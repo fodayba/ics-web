@@ -82,6 +82,16 @@ h1, h2, h3, .font-display {
   @apply mx-auto w-full max-w-7xl px-6 md:px-10;
 }
 
+/* Sticky bar under the header. Slides up to the top edge when the header
+   tucks away on scroll (Navbar toggles `header-hidden` on <html>). */
+@utility toolbar-sticky {
+  position: sticky;
+  top: 4rem;
+  transition: top 0.5s ease-out;
+  @media (width >= 48rem) { top: 4.5rem; }
+  :root.header-hidden & { top: 0; }
+}
+
 @utility section-y {
   @apply py-20 md:py-28;
 }

@@ -7,7 +7,7 @@ import { projects, sectors, sectorSummaries, deliveryRoles, testimonials } from 
 
 const PAGE_SIZE = 9
 const selectClass =
-  'appearance-none border border-white/30 bg-transparent py-2.5 pl-4 pr-10 font-mono text-[11px] uppercase tracking-[0.14em] text-white transition-colors hover:border-white focus:border-white focus:outline-none [&>option]:bg-navy-950'
+  'appearance-none border border-white/30 bg-transparent py-2.5 pl-4 pr-10 font-mono text-base uppercase tracking-[0.08em] text-white transition-colors hover:border-white focus:border-white focus:outline-none md:text-[11px] md:tracking-[0.14em] [&>option]:bg-navy-950'
 
 function Select({ label, value, onChange, options }) {
   return (
@@ -64,7 +64,7 @@ export default function Projects() {
       <label className="relative flex items-center">
         <span className="sr-only">Search projects</span>
         <input type="search" value={query} onChange={(e) => set(setQuery)(e.target.value)} placeholder="Search"
-          className="w-full border border-white/30 bg-transparent py-2.5 pl-4 pr-10 text-sm text-white placeholder:text-white/50 focus:border-white focus:outline-none lg:w-64" />
+          className="w-full border border-white/30 bg-transparent py-2.5 pl-4 pr-10 text-base text-white placeholder:text-white/50 focus:border-white focus:outline-none md:text-sm lg:w-64" />
         <Search className="pointer-events-none absolute right-3 h-4 w-4 text-white/70" strokeWidth={2} aria-hidden="true" />
       </label>
     </div>

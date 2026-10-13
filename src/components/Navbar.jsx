@@ -10,10 +10,30 @@ export default function Navbar() {
   const [hidden, setHidden] = useState(false)
   const close = () => setOpen(false)
 
+  // Lock page scroll while the menu is open. The panel covers the viewport
+  // and contains its own overscroll, so touch scrolling cannot reach the page.
   useEffect(() => {
-    document.body.style.overflow = open ? 'hidden' : ''
+    if (!open) return undefined
+    const html = document.documentElement
+    html.style.overflow = 'hidden'
+    document.body.style.overflow = 'hidden'
     return () => {
+      html.style.overflow = ''
       document.body.style.overflow = ''
+    }
+  }, [open])
+
+  // Close on Escape and when the viewport grows past the mobile breakpoint.
+  useEffect(() => {
+    if (!open) return undefined
+    const onKey = (e) => e.key === 'Escape' && close()
+    const mq = window.matchMedia('(min-width: 48rem)')
+    const onChange = () => mq.matches && close()
+    window.addEventListener('keydown', onKey)
+    mq.addEventListener('change', onChange)
+    return () => {
+      window.removeEventListener('keydown', onKey)
+      mq.removeEventListener('change', onChange)
     }
   }, [open])
 
@@ -28,14 +48,19 @@ export default function Navbar() {
     return () => window.removeEventListener('scroll', onScroll)
   }, [open])
 
+  // Let sticky toolbars under the header follow it when it tucks away.
+  useEffect(() => {
+    document.documentElement.classList.toggle('header-hidden', hidden && !open)
+  }, [hidden, open])
+
   return (
     <header
       className={`sticky top-0 z-40 bg-navy-950 text-white transition-transform duration-500 ease-out ${
-        hidden ? '-translate-y-full' : 'translate-y-0'
+        hidden && !open ? '-translate-y-full' : 'translate-y-0'
       }`}
     >
       <div className="container-x flex h-16 items-center justify-between md:h-18">
-        <Link to="/" aria-label="Home" className="-ml-6 h-full md:-ml-10">
+        <Link to="/" aria-label="Home" className="-ml-6 h-full md:-ml-10" onClick={close}>
           <Logo />
         </Link>
 
@@ -67,14 +92,22 @@ export default function Navbar() {
           onClick={() => setOpen((v) => !v)}
           className="-mr-2 inline-flex h-10 w-10 items-center justify-center text-white md:hidden"
           aria-expanded={open}
+          aria-controls="mobile-menu"
           aria-label={open ? 'Close menu' : 'Open menu'}
         >
           {open ? <X className="h-6 w-6" strokeWidth={1.75} /> : <Menu className="h-6 w-6" strokeWidth={1.75} />}
         </button>
       </div>
 
+      {/* The header carries a transform, which turns it into the containing
+          block for any `fixed` descendant. Position the panel absolutely
+          against the header instead so it reliably fills the rest of the
+          viewport below the bar. */}
       {open && (
-        <div className="fixed inset-x-0 top-16 bottom-0 z-30 bg-navy-950 md:hidden">
+        <div
+          id="mobile-menu"
+          className="absolute inset-x-0 top-full h-[calc(100vh-4rem)] h-[calc(100dvh-4rem)] overflow-y-auto overscroll-contain bg-navy-950 pb-[max(2rem,env(safe-area-inset-bottom))] md:hidden"
+        >
           <nav className="container-x flex flex-col pt-4" aria-label="Mobile">
             {headerNav.map((item, i) => (
               <NavLink

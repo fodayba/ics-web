@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { ArrowLeft, ArrowRight } from 'lucide-react'
 import useActiveSection from '../hooks/useActiveSection'
@@ -105,7 +105,7 @@ export function Featured({ items, label = 'Featured' }) {
 // Sticky bar under the header. Pages pass filters or the on-page section nav.
 export function Toolbar({ children }) {
   return (
-    <div className="sticky top-16 z-20 border-y border-white/10 bg-navy-950/90 backdrop-blur md:top-18">
+    <div className="toolbar-sticky z-20 border-y border-white/10 bg-navy-950/90 backdrop-blur">
       <div className="container-x">{children}</div>
     </div>
   )
@@ -114,21 +114,58 @@ export function Toolbar({ children }) {
 export function SectionNav({ sections }) {
   const ids = useMemo(() => sections.map((s) => s.id), [sections])
   const active = useActiveSection(ids)
+  const scroller = useRef(null)
+  const [edges, setEdges] = useState({ left: false, right: false })
+
+  // Fade the clipped edges so it is obvious the row scrolls on small screens.
+  useEffect(() => {
+    const el = scroller.current
+    if (!el) return undefined
+    const update = () => {
+      const max = el.scrollWidth - el.clientWidth
+      setEdges({ left: el.scrollLeft > 4, right: el.scrollLeft < max - 4 })
+    }
+    update()
+    el.addEventListener('scroll', update, { passive: true })
+    const ro = new ResizeObserver(update)
+    ro.observe(el)
+    return () => {
+      el.removeEventListener('scroll', update)
+      ro.disconnect()
+    }
+  }, [])
+
+  // Keep the active item in view as the reader scrolls through the page.
+  useEffect(() => {
+    const el = scroller.current
+    const item = el?.querySelector('[aria-current="location"]')
+    if (!el || !item) return
+    const pad = 24
+    const left = item.offsetLeft - pad
+    const right = item.offsetLeft + item.offsetWidth + pad
+    if (left < el.scrollLeft) el.scrollTo({ left, behavior: 'smooth' })
+    else if (right > el.scrollLeft + el.clientWidth) el.scrollTo({ left: right - el.clientWidth, behavior: 'smooth' })
+  }, [active])
+
   return (
-    <nav aria-label="On this page" className="-mx-6 overflow-x-auto px-6 [scrollbar-width:none] md:-mx-10 md:px-10">
-      <ul className="flex gap-1 py-3">
-        {sections.map((s) => {
-          const on = s.id === active
-          return (
-            <li key={s.id} className="shrink-0">
-              <a href={`#${s.id}`} aria-current={on ? 'location' : undefined}
-                className={`inline-block px-4 py-2 font-mono text-[11px] uppercase tracking-[0.14em] transition-colors ${on ? 'bg-white text-ink' : 'text-white/60 hover:text-white'}`}>
-                {s.label}
-              </a>
-            </li>
-          )
-        })}
-      </ul>
+    <nav aria-label="On this page" className="relative -mx-6 md:-mx-10">
+      <div ref={scroller} className="overflow-x-auto px-6 [scrollbar-width:none] md:px-10 [&::-webkit-scrollbar]:hidden">
+        <ul className="flex gap-1 py-3">
+          {sections.map((s) => {
+            const on = s.id === active
+            return (
+              <li key={s.id} className="shrink-0">
+                <a href={`#${s.id}`} aria-current={on ? 'location' : undefined}
+                  className={`inline-block px-4 py-2 font-mono text-[11px] uppercase tracking-[0.14em] transition-colors ${on ? 'bg-white text-ink' : 'text-white/60 hover:text-white'}`}>
+                  {s.label}
+                </a>
+              </li>
+            )
+          })}
+        </ul>
+      </div>
+      <span aria-hidden="true" className={`pointer-events-none absolute inset-y-0 left-0 w-10 bg-gradient-to-r from-navy-950 to-transparent transition-opacity ${edges.left ? 'opacity-100' : 'opacity-0'}`} />
+      <span aria-hidden="true" className={`pointer-events-none absolute inset-y-0 right-0 w-14 bg-gradient-to-l from-navy-950 to-transparent transition-opacity ${edges.right ? 'opacity-100' : 'opacity-0'}`} />
     </nav>
   )
 }

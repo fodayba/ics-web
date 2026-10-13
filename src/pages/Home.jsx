@@ -70,17 +70,19 @@ export default function Home() {
               <img key={featuredService.slug} src={featuredService.image.src} alt={featuredService.image.alt} className="absolute inset-0 h-full w-full animate-fade-in object-cover" loading="lazy" />
             </div>
           </Reveal>
-          <div className="grid border-b border-grey-200 sm:grid-cols-3" role="tablist" aria-label="Services">
+          <div className="-mx-6 overflow-x-auto px-6 [scrollbar-width:none] sm:mx-0 sm:px-0 [&::-webkit-scrollbar]:hidden">
+            <div className="flex min-w-max border-b border-grey-200 sm:grid sm:min-w-0 sm:grid-cols-3" role="tablist" aria-label="Services">
             {services.map((s, i) => {
               const selected = i === active
               return (
                 <button key={s.slug} type="button" role="tab" aria-selected={selected} onClick={() => setActive(i)}
-                  className={`relative px-2 py-5 text-left font-mono text-[11px] uppercase tracking-[0.14em] transition-colors sm:px-4 ${selected ? 'text-ink' : 'text-grey-500 hover:text-ink'}`}>
+                  className={`relative shrink-0 px-4 py-5 text-left font-mono text-[11px] uppercase tracking-[0.14em] whitespace-nowrap transition-colors ${selected ? 'text-ink' : 'text-grey-500 hover:text-ink'}`}>
                   <span className={`absolute inset-x-0 top-0 h-0.5 origin-left bg-cobalt-600 transition-transform duration-500 ease-out ${selected ? 'scale-x-100' : 'scale-x-0'}`} />
                   {s.title}
                 </button>
               )
             })}
+            </div>
           </div>
         </div>
       </section>
