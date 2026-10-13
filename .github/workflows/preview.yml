@@ -1,0 +1,33 @@
+name: Preview deploy on pull request
+
+on:
+  pull_request:
+    branches: [main]
+
+jobs:
+  preview:
+    # Fork PRs cannot read secrets, so only run for branches in this repo
+    if: github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+      checks: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run build
+
+      - uses: FirebaseExtended/action-hosting-deploy@v0
+        with:
+          repoToken: ${{ secrets.GITHUB_TOKEN }}
+          firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_ICS_SITE }}
+          projectId: ics-site-5d7c4
+          expires: 7d
