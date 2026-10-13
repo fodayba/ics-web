@@ -1,0 +1,159 @@
+@import "tailwindcss";
+
+@theme {
+  /* Palette: navy for dark surfaces, cobalt accent, warm greys, white. */
+  --color-navy-950: #070d16;
+  --color-navy-900: #0b1626;
+  --color-navy-800: #12233b;
+  --color-navy-700: #1b3353;
+
+  --color-cobalt-600: #0b5ed7;
+  --color-cobalt-500: #1a6fe8;
+  --color-cobalt-400: #4d8ff0;
+  --color-cobalt-100: #e3edfc;
+
+  --color-grey-50: #f7f7f5;
+  --color-grey-100: #f0f0ed;
+  --color-grey-200: #e3e3df;
+  --color-grey-300: #cfcfc9;
+  --color-grey-500: #6e727a;
+  --color-grey-700: #3d4148;
+
+  --color-ink: #0e1116;
+
+  /* Type system: a characterful grotesk for display, a clean humanist sans
+     for reading, and a mono for labels, numbers and technical details. */
+  --font-display: "Bricolage Grotesque", "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-sans: "Instrument Sans", ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace;
+
+  --tracking-tightest: -0.035em;
+
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+
+  --animate-rise: rise 0.9s var(--ease-out-expo) both;
+  --animate-fade-in: fade-in 0.5s ease-out both;
+  --animate-marquee: marquee 40s linear infinite;
+  --animate-kenburns: kenburns 9s ease-out both;
+  --animate-progress: progress 8s linear both;
+
+  @keyframes rise {
+    from { opacity: 0; transform: translateY(28px); }
+    to { opacity: 1; transform: none; }
+  }
+  @keyframes fade-in {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+  @keyframes marquee {
+    from { transform: translateX(0); }
+    to { transform: translateX(-50%); }
+  }
+  @keyframes kenburns {
+    from { transform: scale(1); }
+    to { transform: scale(1.08); }
+  }
+  @keyframes progress {
+    from { width: 0%; }
+    to { width: 100%; }
+  }
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  @apply bg-white text-ink antialiased;
+  font-feature-settings: "ss01", "cv01";
+}
+
+h1, h2, h3, .font-display {
+  font-family: var(--font-display);
+  font-optical-sizing: auto;
+}
+
+::selection {
+  background: var(--color-cobalt-600);
+  color: #fff;
+}
+
+@utility container-x {
+  @apply mx-auto w-full max-w-7xl px-6 md:px-10;
+}
+
+@utility section-y {
+  @apply py-20 md:py-28;
+}
+
+@utility eyebrow {
+  @apply font-mono text-[11px] font-medium uppercase tracking-[0.16em];
+}
+
+@utility chip {
+  @apply inline-flex items-center border px-2.5 py-1 font-mono text-[10px] font-medium uppercase tracking-[0.14em];
+}
+
+/* Animated underline for inline links. */
+@utility link-underline {
+  background-image: linear-gradient(currentColor, currentColor);
+  background-size: 0% 1px;
+  background-repeat: no-repeat;
+  background-position: left bottom;
+  transition: background-size 0.35s var(--ease-out-expo);
+  &:hover { background-size: 100% 1px; }
+}
+
+/* Scroll reveal. Elements start hidden and animate in when observed. */
+.reveal {
+  opacity: 0;
+  transform: translateY(24px);
+  transition:
+    opacity 0.8s var(--ease-out-expo),
+    transform 0.8s var(--ease-out-expo);
+}
+.reveal.is-visible {
+  opacity: 1;
+  transform: none;
+}
+
+/* Survey-mark corner ticks on cards. */
+.ticks {
+  position: relative;
+}
+.ticks::before,
+.ticks::after {
+  content: "";
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+.ticks::before {
+  top: 8px;
+  left: 8px;
+  border-top: 1px solid currentColor;
+  border-left: 1px solid currentColor;
+}
+.ticks::after {
+  bottom: 8px;
+  right: 8px;
+  border-bottom: 1px solid currentColor;
+  border-right: 1px solid currentColor;
+}
+.ticks:hover::before,
+.ticks:hover::after {
+  opacity: 0.6;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  .reveal { opacity: 1; transform: none; transition: none; }
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
